@@ -24,4 +24,20 @@ export class ProductController {
             return res.status(400).json({ error: error.message });
         }
     }
+
+    async update(req: Request, res: Response) {
+        try {
+            const userId = req.user!.id;
+            const { id } = req.params;
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ error: "ID inválido" });
+            }
+
+            const product = await productService.update(id, req.body, userId);
+            return res.json(product);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
 }

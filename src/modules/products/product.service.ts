@@ -23,4 +23,17 @@ export class ProductService {
         if (!product) throw new Error('Produto não encontrado');
         return product;
     }
+
+    async update(id: string, data: {name: string; price: number; stock: number}, userId: string) {
+        const product = await prisma.product.findFirst({
+            where: {id, userId }
+        });
+
+        if (!product) throw new Error("Produto nao encontrado");
+
+        return await prisma.product.update({
+            where: { id }, 
+            data
+        });
+    }
 }

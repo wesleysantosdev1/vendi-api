@@ -9,5 +9,6 @@ router.use(authMiddleware);
 
 router.post('/', productController.create);
 router.get('/', productController.index);
+router.put('/:id', productController.update);
 
 export default router;
