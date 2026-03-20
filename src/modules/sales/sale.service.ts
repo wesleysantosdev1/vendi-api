@@ -1,8 +1,11 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "../../config/database.js";
 
 export class SaleService {
-    async create(userId: string, customer: string, items: { productId: string, quantity: number }[]) {
+    async create(
+        userId: string,
+        customer: { name: string; phone?: string },
+        items: { productId: string; quantity: number }[]
+     ) {
         return await prisma.$transaction(async (tx) => {
             let totalValue = 0;
             const saleItemsData = [];
@@ -12,8 +15,7 @@ export class SaleService {
                     where: { id: item.productId, userId}
                 });
 
-                if (!product) throw new Error(`Produto ${item.productId}não encontrado.`);
-                if (product.stock < item.quantity) throw new Error(`Estoque insuficiente para: ${product.name}`);
+                if (!product) throw new Error("Produto não encontrado");
 
                 const subtotal = product.price * item.quantity;
                 totalValue += subtotal;
@@ -32,13 +34,19 @@ export class SaleService {
 
             return await tx.sale.create({
                 data: {
+                    userId,
                     total: totalValue,
-                    userId, 
+                    customerName: customer.name,
+                    customerPhone: customer.phone,
                     items: {
                         create: saleItemsData
                     }
                 },
-                include: { items: true}
+                include: { 
+                    items: {
+                        include: { product: true }
+                    }
+                }
             });
         });
     }
@@ -46,8 +54,12 @@ export class SaleService {
     async listAll(userId: string) {
         return await prisma.sale.findMany({
             where: { userId },
-            include: { items: { include: { product: true } } },
-            orderBy: { createdAt: 'desc'}
+            include: {
+                items: {
+                    include: { product: true }
+                }
+            },
+            orderBy: { createdAt: "desc" }
         });
     }
 }

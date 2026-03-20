@@ -8,6 +8,7 @@ export class SaleController {
         try{
             const userId = req.user!.id;
             const { customer, items } = req.body;
+
             const sale = await saleService.create(userId, customer, items);
             return res.status(201).json(sale);
         } catch (error: any) {

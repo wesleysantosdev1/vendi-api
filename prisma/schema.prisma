@@ -29,12 +29,14 @@ model Product {
 }
 
 model Sale {
-  id        String     @id @default(uuid())
-  total     Float
-  createdAt DateTime   @default(now())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id])
-  items     SaleItem[]
+  id            String     @id @default(uuid())
+  total         Float
+  createdAt     DateTime   @default(now())
+  customerName  String
+  customerPhone String?
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  items         SaleItem[]
 }
 
 model SaleItem {
