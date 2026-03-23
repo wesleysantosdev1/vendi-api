@@ -1,17 +1,38 @@
 import { prisma } from '../../config/database.js';
+import { startOfMonth, subMonths, format } from 'date-fns';
 
 export class ReportService {
     async getDailyStats(userId: string) {
-        const sales = await prisma.sale.findMany({
-            where: { userId },
-            select: { total: true, createdAt: true }
-        });
+        const [sales, expenses] = await Promise.all([
+            prisma.sale.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+            prisma.expense.findMany({ where: { userId }, orderBy: { date: 'asc' } })
+        ]);
 
-        const expenses = await prisma.expense.findMany({
-            where: { userId },
-            select: { amount: true, date: true }
-        });
+        const now = new Date();
+        const startMonth = startOfMonth(now);
 
-        return { sales, expenses };
+        const totalVendido = sales
+            .filter(s => s.createdAt >= startMonth)
+            .reduce((acc, curr) => acc + curr.total, 0);
+
+        const totalGasto = expenses
+            .filter(e => new Date(e.date) >= startMonth)
+            .reduce((acc, curr) => acc + curr.amount, 0);
+
+        return { 
+            chartData: {
+                dia: this.formatDaily(sales, expenses),
+                mes: this.formatMonthly(sales, expenses)
+            },
+            summary: {
+                totalVendido,
+                totalGasto,
+                lucro: totalVendido - totalGasto
+            }
+        };
+    }
+
+    private formatDaily(sales, expenses) {
+        return[]
     }
 }
