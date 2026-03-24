@@ -40,4 +40,23 @@ export class ProductController {
             return res.status(400).json({ error: error.message });
         }
     }
+
+    async disable(req: Request, res: Response) {
+    try {
+        const { id } = req.params;
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: "ID inválido ou ausente" });
+        }
+
+        await prisma.product.update({
+            where: { id: id },
+            data: { active: false }
+        });
+
+        return res.json({ message: "Produto desativado com sucesso" });
+    } catch (error: any) {
+        return res.status(400).json({ error: error.message });
+    }
+}
 }

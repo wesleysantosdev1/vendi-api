@@ -9,16 +9,18 @@ export class ExpenseService {
                 data: {
                     title, 
                     amount, 
-                    type, 
+                    type: data.type.toUpperCase(),
                     userId, 
-                    date: new Date()
+                    date: new Date(data.date.split('/').reverse().join('-'))
                 }
             });
 
-            if (type === 'COMPRA' && productId && quantity) {
+            if (data.type === 'MERCHANDISE' && data.linkedProductId) {
                 await tx.product.update({
-                    where: { id: productId }, 
-                    data: { stock: { increment: quantity } }
+                    where: { id: data.linkedProductId },
+                    data: { 
+                        stock: { increment: data.quantity || 0 } 
+                    }
                 });
             }
 

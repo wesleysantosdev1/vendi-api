@@ -12,7 +12,10 @@ export class ProductService {
 
     async listAll(userId: string) {
         return await prisma.product.findMany({
-            where: { userId }
+            where: { 
+                userId, 
+                active: true
+            }
         });
     }
 

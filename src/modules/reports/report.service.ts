@@ -1,5 +1,5 @@
 import { prisma } from '../../config/database.js';
-import { startOfMonth, subMonths, format } from 'date-fns';
+import { startOfMonth } from 'date-fns';
 
 export class ReportService {
     async getDailyStats(userId: string) {
@@ -32,7 +32,11 @@ export class ReportService {
         };
     }
 
-    private formatDaily(sales, expenses) {
-        return[]
+    private formatDaily(sales: any[], expenses: any[]) {
+        return [];
+    }
+
+    private formatMonthly(sales: any[], expenses: any[]) {
+        return [];
     }
 }
