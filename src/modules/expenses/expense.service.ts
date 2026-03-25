@@ -2,24 +2,25 @@ import { prisma } from "../../config/database.js";
 
 export class ExpenseService {
     async create(userId: string, data: any) {
-        const { title, amount, type, productId, quantity } = data;
+        const { title, amount, type, productId, quantity, date } = data;
 
         return await prisma.$transaction(async (tx) => {
             const expense = await tx.expense.create({
                 data: {
-                    title, 
-                    amount, 
-                    type: data.type.toUpperCase(),
-                    userId, 
-                    date: new Date(data.date.split('/').reverse().join('-'))
+                    title,
+                    amount,
+                    type: type.toUpperCase(),
+                    quantity,
+                    userId,
+                    date: new Date(date.split('/').reverse().join('-'))
                 }
             });
 
-            if (data.type === 'MERCHANDISE' && data.linkedProductId) {
+            if (type.toUpperCase() === 'MERCHANDISE' && productId) {
                 await tx.product.update({
-                    where: { id: data.linkedProductId },
-                    data: { 
-                        stock: { increment: data.quantity || 0 } 
+                    where: { id: productId },
+                    data: {
+                        stock: { increment: quantity || 0 }
                     }
                 });
             }

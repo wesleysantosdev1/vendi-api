@@ -42,21 +42,30 @@ export class ProductController {
     }
 
     async disable(req: Request, res: Response) {
-    try {
-        const { id } = req.params;
+        try {
+            const userId = req.user!.id;
+            const { id } = req.params;
 
-        if (!id || typeof id !== 'string') {
-            return res.status(400).json({ error: "ID inválido ou ausente" });
+            if (!id || typeof id !== 'string') {
+                return res.status(400).json({ error: "ID inválido ou ausente" });
+            }
+
+            const product = await prisma.product.findFirst({
+                where: { id, userId }
+            });
+
+            if (!product) {
+                return res.status(404).json({ error: "Produto não encontrado" });
+            }
+
+            await prisma.product.update({
+                where: { id: id },
+                data: { active: false }
+            });
+
+            return res.json({ message: "Produto desativado com sucesso" });
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
         }
-
-        await prisma.product.update({
-            where: { id: id },
-            data: { active: false }
-        });
-
-        return res.json({ message: "Produto desativado com sucesso" });
-    } catch (error: any) {
-        return res.status(400).json({ error: error.message });
     }
-}
 }

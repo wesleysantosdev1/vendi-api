@@ -10,5 +10,6 @@ router.use(authMiddleware);
 router.post('/', productController.create);
 router.get('/', productController.index);
 router.put('/:id', productController.update);
+router.patch('/:id/disable', productController.disable);
 
 export default router;
