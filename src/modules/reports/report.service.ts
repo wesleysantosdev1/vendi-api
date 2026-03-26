@@ -22,6 +22,7 @@ export class ReportService {
         return { 
             chartData: {
                 dia: this.formatDaily(sales, expenses),
+                semana: this.formatWeekly(sales, expenses),
                 mes: this.formatMonthly(sales, expenses)
             },
             summary: {
@@ -33,6 +34,10 @@ export class ReportService {
     }
 
     private formatDaily(sales: any[], expenses: any[]) {
+        return [];
+    }
+
+    private formatWeekly(sales: any[], expenses: any[]) {
         return [];
     }
 
