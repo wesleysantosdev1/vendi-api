@@ -27,6 +27,7 @@ model Product {
   userId    String
   user      User       @relation(fields: [userId], references: [id])
   saleItems SaleItem[]
+  expenses  Expense[]
 }
 
 model Sale {
@@ -59,4 +60,6 @@ model Expense {
   quantity  Int?
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
 }

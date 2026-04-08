@@ -4,6 +4,11 @@ export class ExpenseService {
     async create(userId: string, data: any) {
         const { title, amount, type, productId, quantity, date } = data;
 
+        const [day, month, year] = date.split('/');
+        const now = new Date();
+        const isoString = `${year}-${month}-${day}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+        const expenseDate = new Date(isoString);
+
         return await prisma.$transaction(async (tx) => {
             const expense = await tx.expense.create({
                 data: {
@@ -12,7 +17,8 @@ export class ExpenseService {
                     type: type.toUpperCase(),
                     quantity,
                     userId,
-                    date: new Date(date.split('/').reverse().join('-'))
+                    date: expenseDate,
+                    productId: productId || null,
                 }
             });
 
@@ -32,7 +38,12 @@ export class ExpenseService {
     async listAll(userId: string) {
         return await prisma.expense.findMany({
             where: { userId },
-            orderBy: { date: 'desc'}
+            orderBy: { date: 'desc'},
+            include: {
+                product: {
+                    select: {name: true}
+                }
+            }
         });
     }
 }
