@@ -22,7 +22,7 @@ export class ExpenseService {
                 }
             });
 
-            if (type.toUpperCase() === 'MERCHANDISE' && productId) {
+            if (type.toUpperCase() === 'COMPRA' && productId) {
                 await tx.product.update({
                     where: { id: productId },
                     data: {

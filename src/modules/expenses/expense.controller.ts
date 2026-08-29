@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { ExpenseService } from "./expense.service.js";
-import { title } from "node:process";
 
 const expenseService = new ExpenseService();
 
@@ -31,7 +30,7 @@ export class ExpenseController {
                 linkedProductName: exp.product?.name || null
             }));
             
-            return res.json(expense);
+            return res.json(formattedExpenses);
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }
