@@ -10,6 +10,11 @@ export class ExpenseService {
         const expenseDate = new Date(isoString);
 
         return await prisma.$transaction(async (tx) => {
+            if (productId) {
+                const product = await tx.product.findFirst({ where: { id: productId, userId } });
+                if (!product) throw new Error("Produto não encontrado");
+            }
+
             const expense = await tx.expense.create({
                 data: {
                     title,
@@ -22,9 +27,9 @@ export class ExpenseService {
                 }
             });
 
-            if (type.toUpperCase() === 'MERCHANDISE' && productId) {
+            if (type.toUpperCase() === 'COMPRA' && productId) {
                 await tx.product.update({
-                    where: { id: productId },
+                    where: { id: productId, userId },
                     data: {
                         stock: { increment: quantity || 0 }
                     }

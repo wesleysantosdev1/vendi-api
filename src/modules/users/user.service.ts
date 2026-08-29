@@ -1,4 +1,3 @@
-import { tr } from "date-fns/locale";
 import { prisma } from "../../config/database.js";
 import bcrypt from 'bcrypt';
 
