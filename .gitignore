@@ -7,3 +7,5 @@ node_modules
 # Notas e skills locais do Claude Code (não fazem parte do projeto compartilhado)
 CLAUDE.md
 .claude/
+
+dist

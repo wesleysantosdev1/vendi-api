@@ -40,9 +40,15 @@ export class UserService {
     }
 
     async updateProfile(userId: string, data: { name?: string; email?: string }) {
+        if (data.email) {
+            const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+            if (existingUser && existingUser.id !== userId) throw new Error("E-mail já cadastrado");
+        }
+
         return await prisma.user.update({
             where: { id: userId },
-            data
+            data,
+            select: { id: true, name: true, email: true }
         });
     }
 }

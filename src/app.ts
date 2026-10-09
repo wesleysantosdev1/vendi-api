@@ -5,6 +5,9 @@ import { notFoundMiddleware, errorMiddleware } from './middlewares/error.middlew
 
 const app = express();
 
+// Atrás do proxy da hospedagem (Render), para o rate limit ver o IP real do cliente
+app.set('trust proxy', 1);
+
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(origin => origin.trim());
 
 app.use(cors({
