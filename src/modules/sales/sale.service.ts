@@ -16,6 +16,7 @@ export class SaleService {
                 });
 
                 if (!product) throw new Error("Produto não encontrado");
+                if (!product.active) throw new Error(`Produto "${product.name}" está desativado`);
 
                 const subtotal = product.price * item.quantity;
                 totalValue += subtotal;
@@ -26,10 +27,16 @@ export class SaleService {
                     price: product.price
                 });
 
-                await tx.product.update({
-                    where: { id: product.id},
+                // Decremento condicional: só baixa se ainda houver estoque suficiente
+                // (evita estoque negativo e corrida entre vendas simultâneas).
+                const { count } = await tx.product.updateMany({
+                    where: { id: product.id, userId, active: true, stock: { gte: item.quantity } },
                     data: { stock: { decrement: item.quantity } }
                 });
+
+                if (count === 0) {
+                    throw new Error(`Estoque insuficiente para "${product.name}"`);
+                }
             }
 
             return await tx.sale.create({
