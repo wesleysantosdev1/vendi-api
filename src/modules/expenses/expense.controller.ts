@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ExpenseService } from "./expense.service.js";
+import { sendError } from "../../utils/app.error.js";
 
 const expenseService = new ExpenseService();
 
@@ -9,8 +10,8 @@ export class ExpenseController {
             const userId = req.user!.id;
             const expense = await expenseService.create(userId, req.body);
             return res.status(201).json(expense);
-        } catch (error: any) {
-            return res.status(400).json({ error: error.message });
+        } catch (error) {
+            return sendError(res, error);
         }
     }
 
@@ -31,8 +32,8 @@ export class ExpenseController {
             }));
             
             return res.json(formattedExpenses);
-        } catch (error: any) {
-            return res.status(400).json({ error: error.message });
+        } catch (error) {
+            return sendError(res, error);
         }
     }
 }

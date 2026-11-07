@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database.js";
-import bcrypt from 'bcrypt';
+import { Prisma } from "@prisma/client";
+import { AppError } from "../../utils/app.error.js";
 
 export class UserService {
     async getProfile(userId: string) {
@@ -27,7 +28,7 @@ export class UserService {
             })
         ]);
 
-        if (!user) throw new Error("Usuário não encontrado");
+        if (!user) throw new AppError("Usuário não encontrado. Sua conta pode ter sido removida; faça login novamente.", 404);
 
         return {
             ...user,
@@ -42,13 +43,23 @@ export class UserService {
     async updateProfile(userId: string, data: { name?: string; email?: string }) {
         if (data.email) {
             const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
-            if (existingUser && existingUser.id !== userId) throw new Error("E-mail já cadastrado");
+            if (existingUser && existingUser.id !== userId) {
+                throw new AppError("Este e-mail já está sendo usado por outra conta.", 409);
+            }
         }
 
-        return await prisma.user.update({
-            where: { id: userId },
-            data,
-            select: { id: true, name: true, email: true }
-        });
+        try {
+            return await prisma.user.update({
+                where: { id: userId },
+                data,
+                select: { id: true, name: true, email: true }
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2002') throw new AppError("Este e-mail já está sendo usado por outra conta.", 409);
+                if (error.code === 'P2025') throw new AppError("Usuário não encontrado. Faça login novamente.", 404);
+            }
+            throw error;
+        }
     }
 }

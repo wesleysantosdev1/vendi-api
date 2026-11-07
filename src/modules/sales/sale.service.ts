@@ -1,4 +1,5 @@
 import { prisma } from "../../config/database.js";
+import { AppError } from "../../utils/app.error.js";
 
 export class SaleService {
     async create(
@@ -15,8 +16,8 @@ export class SaleService {
                     where: { id: item.productId, userId}
                 });
 
-                if (!product) throw new Error("Produto não encontrado");
-                if (!product.active) throw new Error(`Produto "${product.name}" está desativado`);
+                if (!product) throw new AppError("Um dos produtos da venda não foi encontrado. Ele pode ter sido excluído; atualize a lista e tente de novo.", 404);
+                if (!product.active) throw new AppError(`O produto "${product.name}" está desativado e não pode ser vendido.`, 422);
 
                 const subtotal = product.price * item.quantity;
                 totalValue += subtotal;
@@ -35,7 +36,7 @@ export class SaleService {
                 });
 
                 if (count === 0) {
-                    throw new Error(`Estoque insuficiente para "${product.name}"`);
+                    throw new AppError(`Estoque insuficiente para "${product.name}": você tentou vender ${item.quantity}, mas há só ${product.stock} em estoque.`, 409);
                 }
             }
 

@@ -1,4 +1,5 @@
 import { prisma } from "../../config/database.js";
+import { AppError } from "../../utils/app.error.js";
 
 export class ExpenseService {
     async create(userId: string, data: any) {
@@ -12,7 +13,8 @@ export class ExpenseService {
         return await prisma.$transaction(async (tx) => {
             if (productId) {
                 const product = await tx.product.findFirst({ where: { id: productId, userId } });
-                if (!product) throw new Error("Produto não encontrado");
+                if (!product) throw new AppError("Produto vinculado não encontrado. Ele pode ter sido excluído; escolha outro produto.", 404);
+                if (!product.active) throw new AppError(`O produto "${product.name}" está desativado e não pode receber entrada de estoque.`, 422);
             }
 
             const expense = await tx.expense.create({

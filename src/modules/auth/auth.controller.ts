@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service.js";
+import { sendError } from "../../utils/app.error.js";
 
 const authService = new AuthService();
 
@@ -8,8 +9,8 @@ export class AuthController {
         try {
             const user = await authService.register(req.body);
             return res.status(201).json(user);
-        } catch (error: any) {
-            return res.status(400).json({ error: error.message });
+        } catch (error) {
+            return sendError(res, error);
         }
     }
 
@@ -17,8 +18,8 @@ export class AuthController {
         try {
             const data = await authService.login(req.body);
             return res.status(200).json(data);
-        } catch (error: any) {
-            return res.status(401).json({ error: error.message });
+        } catch (error) {
+            return sendError(res, error);
         }
     }
 };
