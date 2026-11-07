@@ -11,8 +11,11 @@ function joinPt(items: string[]) {
 
 // Senha forte: usada no cadastro (e em qualquer troca de senha futura).
 // Não usar no login: quem já tem conta com senha antiga precisa continuar entrando.
+// trim: o teclado do Android costuma pôr espaço depois de palavra sugerida; espaço
+// nas pontas não conta nem vai para o hash. Espaço no meio é aceito, mas não vale como símbolo.
 export const strongPasswordSchema = z
     .string({ error: "Senha é obrigatória" })
+    .trim()
     .superRefine((value, ctx) => {
         if (Buffer.byteLength(value, "utf8") > PASSWORD_MAX_BYTES) {
             ctx.addIssue({ code: "custom", message: `Senha muito longa: use no máximo ${PASSWORD_MAX_BYTES} caracteres` });
@@ -24,7 +27,7 @@ export const strongPasswordSchema = z
         if (!/[a-z]/.test(value)) missing.push("uma letra minúscula");
         if (!/[A-Z]/.test(value)) missing.push("uma letra maiúscula");
         if (!/[0-9]/.test(value)) missing.push("um número");
-        if (!/[^A-Za-z0-9]/.test(value)) missing.push("um símbolo (ex.: ! @ # $ %)");
+        if (!/[^A-Za-z0-9\s]/.test(value)) missing.push("um símbolo (ex.: ! @ # $ %)");
 
         if (missing.length > 0) {
             ctx.addIssue({ code: "custom", message: `A senha precisa ter ${joinPt(missing)}` });

@@ -42,11 +42,22 @@ export class AuthService {
         }
     }
 
+    // O cadastro grava o hash da senha "trimada". Contas antigas podem ter sido
+    // criadas com espaço nas pontas, então se a versão trimada falhar e for diferente
+    // da crua, tenta a crua. Roda igual com DUMMY_HASH (e-mail inexistente), para o
+    // tempo de resposta não revelar se a conta existe.
+    private async checkPassword(rawPassword: string, hash: string) {
+        const trimmed = rawPassword.trim();
+        if (await bcrypt.compare(trimmed, hash)) return true;
+        if (trimmed !== rawPassword) return bcrypt.compare(rawPassword, hash);
+        return false;
+    }
+
     async login(credentials: any) {
         const { email, password } = credentials;
         const user = await prisma.user.findUnique({ where: {email } });
 
-        const isPasswordValid = await bcrypt.compare(password, user?.password ?? DUMMY_HASH);
+        const isPasswordValid = await this.checkPassword(password, user?.password ?? DUMMY_HASH);
         if (!user || !isPasswordValid) throw new AppError(INVALID_CREDENTIALS_MESSAGE, 401);
 
         const token = Jwt.sign(
